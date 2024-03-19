@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+    
+    <div class="chat">
+        <div id="BoxMessage"></div>
+        <div class="input-group mt-3">
+            <input type="text" class="form-control" id="InputMessage" placeholder="Write a messages...">
+            <button class="input-group-text btn btn-primary" id="ButtonMessage">Send</button>
+        </div>
+    </div>
+
+    <script>
+
+        var url = 'ws://'+window.location.host+'/ws/chat/room/{{ room.id }}'
+
+        var chatSocket = new WebSocket(url)
+
+        //***message
+
+        document.querySelector('#ButtonMessage').addEventListener("click",sendMessage)
+        document.querySelector('#InputMessage').addEventListener("keypress", function(e){
+            if(e.keyCode == 13){
+                sendMessage()
+            }
+        })
+         
+        function sendMessage(){
+            message = document.querySelector("#InputMessage")
+
+            if(message.value.trim() !== ''){
+                chatSocket.send(JSON.stringify({ 'message': message.value.trim() }))
+            }
+
+            message.value = ''
+        }
+
+        //***message
+
+        chatSocket.onopen = function(e){
+            console.log('Channels WS is Open!')
+        }
+
+        chatSocket.onmessage = function(data){
+
+            var message = JSON.parse(data.data)
+
+            boxMessage = document.querySelector("#BoxMessage")
+
+            boxMessage.innerHTML += '<div class="alert alert-success mt-3">' + message.message + '</div>'
+
+            // console.log('Data receive! '+message.message)
+
+        }
+
+        chatSocket.onclose = function(e){
+            console.log('Channels WS is Close!')
+        }
+
+
+
+    </script>
+
+{% endblock  %}
