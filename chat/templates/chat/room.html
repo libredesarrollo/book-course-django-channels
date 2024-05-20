@@ -3,6 +3,7 @@
 {% block content %}
     
     <div class="chat">
+
         <div id="BoxMessage"></div>
         <div class="input-group mt-3">
             <input type="text" class="form-control" id="InputMessage" placeholder="Write a messages...">
@@ -11,6 +12,8 @@
     </div>
 
     <script>
+
+        var user = '{{ request.user }}'
 
         var url = 'ws://'+window.location.host+'/ws/chat/room/{{ room.id }}'
 
@@ -43,14 +46,26 @@
 
         chatSocket.onmessage = function(data){
 
-            var message = JSON.parse(data.data)
+            var data = JSON.parse(data.data)
+            console.log(data)
+            var msj = data.message
+            var username = data.username
+            var datetime = data.datetime
 
             boxMessage = document.querySelector("#BoxMessage")
 
-            boxMessage.innerHTML += '<div class="alert alert-success mt-3">' + message.message + '</div>'
+            var customClass = 'alert-success mr-5'
+            if(user != username){
+                var customClass = 'alert-warning ml-5'
+            }
 
-            // console.log('Data receive! '+message.message)
-
+            boxMessage.innerHTML += `
+            <div class="alert ${customClass} mt-3">
+                ${msj}
+                <small class='fst-italic'>${username}</small>
+                <small class='float-end'>${datetime}</small>
+            </div>
+            `
         }
 
         chatSocket.onclose = function(e){
